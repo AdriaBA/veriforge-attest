@@ -1,0 +1,10 @@
+version: 1
+rules:
+  - id: block-failed-tests
+    when: evidence.unit_tests == failed
+    decision: block
+    message: Unit tests failed — merge blocked by policy.
+  - id: review-dependency-scan
+    when: evidence.dependency_scan == failed
+    decision: review
+    message: Dependency scan reported failures — human review required.

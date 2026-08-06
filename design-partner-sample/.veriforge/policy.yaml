@@ -1,0 +1,18 @@
+version: 1
+rules:
+  - id: block-failed-tests
+    when: evidence.unit_tests == failed
+    decision: block
+    message: Unit tests failed — merge blocked by policy.
+  - id: block-migration-forward
+    when: evidence.migration_forward == failed
+    decision: block
+    message: Migration forward test failed — merge blocked.
+  - id: block-migration-rollback
+    when: evidence.migration_rollback == failed
+    decision: block
+    message: Migration rollback test failed — merge blocked.
+  - id: review-dependency-scan
+    when: evidence.dependency_scan == failed
+    decision: review
+    message: Dependency scan reported failures — human review required.

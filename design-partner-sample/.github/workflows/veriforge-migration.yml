@@ -1,0 +1,61 @@
+# Design-partner reference workflow: migration wedge + OTEL + VeriForge Checks.
+# Copy into a consumer repo. Adjust `uses:` to the published action path/tag.
+name: veriforge-migration-wedge
+
+on:
+  pull_request:
+    paths:
+      - "db/migrations/**"
+      - "db/schema.sql"
+      - ".veriforge/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  migration-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run migration CI
+        run: bash design-partner-sample/scripts/run-migration-ci.sh
+        # When copied to partner root, use: bash scripts/run-migration-ci.sh
+
+      - name: Ensure OTEL export present
+        run: |
+          set -euo pipefail
+          if [ ! -f design-partner-sample/.veriforge/otel-export.json ] && [ -f design-partner-sample/.veriforge/otel-export.jsonl ]; then
+            cp design-partner-sample/.veriforge/otel-export.jsonl design-partner-sample/.veriforge/otel-export.json
+          fi
+          if [ ! -f design-partner-sample/.veriforge/otel-export.json ]; then
+            echo "Missing design-partner-sample/.veriforge/otel-export.json"
+            echo "Capture a live agent session with scripts/capture-otlp-session.mjs or download the agent-job OTLP artifact before VeriForge Attest."
+            exit 2
+          fi
+
+      - name: VeriForge Attest + Check Run
+        id: veriforge
+        uses: ./03-Projects/veriforge-attest
+        # Partner install: uses: veriforge/attest@v0.4
+        with:
+          otel_path: ${{ github.workspace }}/design-partner-sample/.veriforge/otel-export.json
+          ci_results_path: ${{ github.workspace }}/design-partner-sample/.veriforge/ci-results.json
+          policy_path: ${{ github.workspace }}/design-partner-sample/.veriforge/policy.yaml
+          wedge: migration
+          output_dir: veriforge-out
+          publish_check: "true"
+          check_name: VeriForge Attest (migration)
+          # check_mock: "true"   # dry-run without Checks API
+
+      - name: Echo outputs
+        run: |
+          echo "check_run_id=${{ steps.veriforge.outputs.check_run_id }}"
+          echo "check_conclusion=${{ steps.veriforge.outputs.check_conclusion }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: veriforge-migration-receipt
+          path: veriforge-out/

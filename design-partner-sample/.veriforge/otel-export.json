@@ -1,0 +1,152 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          { "key": "service.name", "value": { "stringValue": "claude-code" } },
+          { "key": "service.version", "value": { "stringValue": "1.0.0" } },
+          {
+            "key": "telemetry.sdk.language",
+            "value": { "stringValue": "javascript" }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": { "stringValue": "opentelemetry" }
+          },
+          {
+            "key": "claude_code.session.id",
+            "value": { "stringValue": "sess_partner_migration_20260718" }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "com.anthropic.claude_code",
+            "version": "1.0.0"
+          },
+          "spans": [
+            {
+              "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+              "spanId": "00f067aa0ba902b7",
+              "name": "claude_code.session",
+              "kind": 1,
+              "startTimeUnixNano": "1752835200000000000",
+              "endTimeUnixNano": "1752835260000000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.system",
+                  "value": { "stringValue": "anthropic" }
+                },
+                {
+                  "key": "gen_ai.request.model",
+                  "value": { "stringValue": "claude-sonnet-4-20250514" }
+                },
+                {
+                  "key": "gen_ai.conversation.id",
+                  "value": { "stringValue": "sess_partner_migration_20260718" }
+                }
+              ]
+            },
+            {
+              "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+              "spanId": "11f067aa0ba902b8",
+              "parentSpanId": "00f067aa0ba902b7",
+              "name": "claude_code.tool.read",
+              "kind": 3,
+              "startTimeUnixNano": "1752835205000000000",
+              "endTimeUnixNano": "1752835206000000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": { "stringValue": "Read" }
+                },
+                {
+                  "key": "file.path",
+                  "value": {
+                    "stringValue": "db/migrations/20260718_add_billing_accounts.sql"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+              "spanId": "22f067aa0ba902b9",
+              "parentSpanId": "00f067aa0ba902b7",
+              "name": "claude_code.tool.edit",
+              "kind": 3,
+              "startTimeUnixNano": "1752835210000000000",
+              "endTimeUnixNano": "1752835225000000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": { "stringValue": "Edit" }
+                },
+                {
+                  "key": "code.file.path",
+                  "value": {
+                    "stringValue": "db/migrations/20260718_add_billing_accounts.sql"
+                  }
+                },
+                {
+                  "key": "claude_code.tool.file_path",
+                  "value": {
+                    "stringValue": "db/schema.sql"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+              "spanId": "33f067aa0ba902ba",
+              "parentSpanId": "00f067aa0ba902b7",
+              "name": "claude_code.tool.write",
+              "kind": 3,
+              "startTimeUnixNano": "1752835230000000000",
+              "endTimeUnixNano": "1752835240000000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": { "stringValue": "Write" }
+                },
+                {
+                  "key": "file.path",
+                  "value": {
+                    "stringValue": "db/migrations/20260718_add_billing_accounts_down.sql"
+                  }
+                }
+              ]
+            },
+            {
+              "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+              "spanId": "44f067aa0ba902bb",
+              "parentSpanId": "00f067aa0ba902b7",
+              "name": "claude_code.api_request",
+              "kind": 3,
+              "startTimeUnixNano": "1752835245000000000",
+              "endTimeUnixNano": "1752835255000000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.request.model",
+                  "value": { "stringValue": "claude-sonnet-4-20250514" }
+                },
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": { "stringValue": "chat" }
+                },
+                {
+                  "key": "gen_ai.usage.input_tokens",
+                  "value": { "intValue": "4200" }
+                },
+                {
+                  "key": "gen_ai.usage.output_tokens",
+                  "value": { "intValue": "890" }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "_type": "https://veriforge.dev/schemas/agent-execution-predicate/v0.1",
+  "title": "VeriForge Agent Execution Predicate",
+  "description": "Execution Receipt predicate for AI agent-generated changes. Every evidence claim includes an assurance class.",
+  "predicateType": "https://veriforge.dev/predicates/agent-execution/v0.1",
+  "assuranceClasses": [
+    "cryptographic",
+    "deterministic",
+    "observed",
+    "tool-derived",
+    "statistical",
+    "human-attested",
+    "declared",
+    "inferred",
+    "unknown"
+  ],
+  "example": {
+    "version": "0.1",
+    "source": {
+      "repository": "org/repo",
+      "head_commit": "abc123"
+    },
+    "task": { "wedge": "migration", "workflow": "veriforge-attest" },
+    "agent": {
+      "name": "claude-code",
+      "model_identifier": { "value": "claude-sonnet-4", "assurance": "declared" }
+    },
+    "evidence": [
+      {
+        "id": "unit_tests",
+        "kind": "test",
+        "outcome": "passed",
+        "assurance": "deterministic"
+      }
+    ],
+    "policy": { "version": 1, "decision": "allow", "reasons": [] }
+  }
+}

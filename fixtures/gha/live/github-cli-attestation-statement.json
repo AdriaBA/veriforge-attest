@@ -1,0 +1,47 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "gh_2.50.0_windows_arm64.zip",
+      "digest": {
+        "sha256": "8aad120b416386b4269ef62c8fdebcad31a70847297817a149daf927edc85548"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+      "externalParameters": {
+        "workflow": {
+          "path": ".github/workflows/deployment.yml",
+          "ref": "refs/heads/trunk",
+          "repository": "https://github.com/cli/cli"
+        }
+      },
+      "internalParameters": {
+        "github": {
+          "event_name": "workflow_dispatch",
+          "repository_id": "212613049",
+          "repository_owner_id": "59704711"
+        }
+      },
+      "resolvedDependencies": [
+        {
+          "digest": {
+            "gitCommit": "faef2ddd81b0736748413a7c646cd0bfc26c00a0"
+          },
+          "uri": "git+https://github.com/cli/cli@refs/heads/trunk"
+        }
+      ]
+    },
+    "runDetails": {
+      "builder": {
+        "id": "https://github.com/actions/runner/github-hosted"
+      },
+      "metadata": {
+        "invocationId": "https://github.com/cli/cli/actions/runs/9289075752/attempts/1"
+      }
+    }
+  }
+}

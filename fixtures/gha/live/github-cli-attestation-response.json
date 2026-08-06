@@ -1,0 +1,17 @@
+{
+  "source": {
+    "repository": "cli/cli",
+    "endpoint": "GET /repos/cli/cli/attestations/sha256:8aad120b416386b4269ef62c8fdebcad31a70847297817a149daf927edc85548",
+    "subject_name": "gh_2.50.0_windows_arm64.zip",
+    "subject_digest": "sha256:8aad120b416386b4269ef62c8fdebcad31a70847297817a149daf927edc85548",
+    "captured_at": "2026-07-18T11:03:23.466Z"
+  },
+  "attestation_count": 1,
+  "attestations": [
+    {
+      "repository_id": 212613049,
+      "initiator": "user",
+      "bundle_url_redacted": "https://tmaproduction.blob.core.windows.net/attestations/212613049/2024/05/29/937309.json.sn?<redacted-expiring-query>"
+    }
+  ]
+}

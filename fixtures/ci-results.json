@@ -1,0 +1,9 @@
+{
+  "unit_tests": "passed",
+  "lint": "passed",
+  "dependency_scan": "failed",
+  "sources": {
+    "unit_tests": "github-actions:jest",
+    "dependency_scan": "github-actions:snyk"
+  }
+}

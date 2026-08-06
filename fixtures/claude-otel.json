@@ -1,0 +1,20 @@
+{
+  "resourceSpans": [
+    {
+      "scopeSpans": [
+        {
+          "spans": [
+            {
+              "name": "claude.tool.edit",
+              "attributes": {
+                "claude.session_id": "sess_demo_001",
+                "gen_ai.request.model": "claude-sonnet-4-20250514",
+                "file.path": "db/migrations/20260707_add_users.sql"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

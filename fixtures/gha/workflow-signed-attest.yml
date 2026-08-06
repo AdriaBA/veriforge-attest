@@ -1,0 +1,68 @@
+# Fixture / reference workflow: VeriForge Attest + GitHub Checks + optional artifact attestations.
+# Copy into .github/workflows/ of a consumer repo. Not executed from the vault itself.
+#
+# Permissions for keyless Cosign / Sigstore:
+#   contents: read
+#   checks: write          # Check Runs API
+#   id-token: write        # ambient OIDC for cosign_keyless + actions/attest
+#   attestations: write    # GitHub artifact attestations
+
+name: veriforge-attest-signed
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  id-token: write
+  attestations: write
+  actions: read
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write sample CI results
+        run: |
+          mkdir -p .veriforge
+          cat > .veriforge/ci-results.json <<'EOF'
+          {
+            "unit_tests": "passed",
+            "lint": "passed",
+            "sast": "passed",
+            "dependency_scan": "passed",
+            "sources": { "unit_tests": "github-actions:fixture" }
+          }
+          EOF
+
+      # Composite action: receipt + keyless Cosign Sigstore bundle + Check Run on the PR head SHA
+      - name: VeriForge Attest + Check Run
+        id: veriforge
+        uses: ./03-Projects/veriforge-attest
+        with:
+          ci_results_path: ${{ github.workspace }}/.veriforge/ci-results.json
+          wedge: migration
+          output_dir: veriforge-out
+          publish_check: "true"
+          check_name: VeriForge Attest
+          # Preferred CI signing: Cosign keyless via ambient GitHub OIDC (no cosign.key secret).
+          cosign_keyless: "true"
+          # Also bind the predicate to the receipt with GitHub artifact attestations.
+          github_attest: "true"
+          # Dry-run Checks without API (debug):
+          # check_mock: "true"
+
+      - name: Echo check conclusion
+        run: |
+          echo "check_run_id=${{ steps.veriforge.outputs.check_run_id }}"
+          echo "check_conclusion=${{ steps.veriforge.outputs.check_conclusion }}"
+
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: veriforge-signed-receipt
+          path: veriforge-out/

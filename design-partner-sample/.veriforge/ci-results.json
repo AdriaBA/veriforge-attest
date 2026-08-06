@@ -1,0 +1,15 @@
+{
+  "unit_tests": "passed",
+  "lint": "passed",
+  "sast": "passed",
+  "dependency_scan": "passed",
+  "migration_forward": "passed",
+  "migration_rollback": "passed",
+  "sources": {
+    "unit_tests": "design-partner-sample/scripts/run-migration-ci.sh",
+    "lint": "design-partner-sample/scripts/run-migration-ci.sh",
+    "migration_forward": "sqlite3:forward",
+    "migration_rollback": "sqlite3:down",
+    "dependency_scan": "local:fixture"
+  }
+}

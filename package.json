@@ -1,0 +1,33 @@
+{
+  "name": "@veriforge/attest",
+  "version": "0.5.0",
+  "description": "VeriForge Attest — signed in-toto Execution Receipts + GitHub Checks from agent OTEL + CI (DSSE / Cosign / GitHub attestations)",
+  "type": "module",
+  "bin": {
+    "veriforge-attest": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --import tsx --test test/*.test.ts",
+    "attest": "node --import tsx src/cli.ts",
+    "signed-demo": "bash scripts/local-signed-attest.sh",
+    "check-demo": "bash scripts/local-check-publish.sh",
+    "policy-demo": "node --import tsx src/cli.ts --otel fixtures/claude-otel.json --ci fixtures/ci-results.json --policy fixtures/policy.rego --head-sha policy-demo --wedge migration --out ./veriforge-out/policy-demo",
+    "capture-otlp": "node scripts/capture-otlp-session.mjs --out design-partner-sample/.veriforge/otel-export.jsonl",
+    "partner-e2e": "bash design-partner-sample/scripts/e2e-local.sh"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+veriforge-out/
+design-partner-sample/.veriforge/out/
+*.tsbuildinfo
+fixtures/signing/cosign.key
+fixtures/signing/*.key
+!fixtures/signing/dev.pub.pem
+.veriforge-sign/

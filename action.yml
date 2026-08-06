@@ -1,0 +1,159 @@
+name: VeriForge Attest
+description: Generate signed in-toto Execution Receipt from OTEL + CI and publish GitHub Check Run
+branding:
+  icon: check-circle
+  color: blue
+inputs:
+  otel_path:
+    description: Path to Claude Code / OTEL JSON export
+    required: false
+  ci_results_path:
+    description: Path to CI results JSON (unit_tests, lint, scans)
+    required: true
+  policy_path:
+    description: Path to VeriForge policy YAML
+    required: false
+  wedge:
+    description: Workflow wedge (migration, dependency_upgrade, iac, authz, other)
+    required: false
+    default: other
+  output_dir:
+    description: Directory for receipt artifacts
+    required: false
+    default: veriforge-out
+  sign_key:
+    description: PEM private key path for Node DSSE signing (repo-relative or absolute)
+    required: false
+  cosign_key:
+    description: Local/offline Cosign private key path (dev or legacy CI only; CI should prefer cosign_keyless)
+    required: false
+  cosign_keyless:
+    description: "If true, use Cosign keyless signing via ambient GitHub Actions OIDC (requires id-token: write)"
+    required: false
+    default: "false"
+  github_attest:
+    description: If true, also create a GitHub artifact attestation via actions/attest
+    required: false
+    default: "false"
+  publish_check:
+    description: If true, open/update a GitHub Check Run from the attest bundle
+    required: false
+    default: "true"
+  check_name:
+    description: GitHub Check Run name
+    required: false
+    default: VeriForge Attest
+  check_mock:
+    description: If true, write github-check-run.json only (no Checks API call)
+    required: false
+    default: "false"
+  check_run_id:
+    description: Optional existing Check Run id to PATCH
+    required: false
+  check_details_url:
+    description: Optional details_url for the Check Run
+    required: false
+outputs:
+  receipt_dir:
+    description: Path to receipt output directory
+    value: ${{ steps.paths.outputs.receipt_dir }}
+  bundle_path:
+    description: Path to DSSE bundle
+    value: ${{ steps.paths.outputs.bundle_path }}
+  check_run_id:
+    description: GitHub Check Run id (live or mock)
+    value: ${{ steps.check.outputs.check_run_id }}
+  check_conclusion:
+    description: Check Run conclusion (success|failure|action_required|…)
+    value: ${{ steps.check.outputs.check_conclusion }}
+runs:
+  using: composite
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+      working-directory: ${{ github.action_path }}
+    - name: Build
+      shell: bash
+      run: npm run build
+      working-directory: ${{ github.action_path }}
+    - name: Install Cosign
+      if: inputs.cosign_key != '' || inputs.cosign_keyless == 'true'
+      uses: sigstore/cosign-installer@v3
+    - name: Generate Execution Receipt
+      id: attest
+      shell: bash
+      env:
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_REF: ${{ github.ref }}
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_WORKFLOW: ${{ github.workflow }}
+        COSIGN_PASSWORD: ${{ env.COSIGN_PASSWORD }}
+      run: |
+        set -euo pipefail
+        OUT="${{ github.workspace }}/${{ inputs.output_dir }}"
+        mkdir -p "$OUT"
+        ARGS=(--ci "${{ inputs.ci_results_path }}" --out "$OUT" --wedge "${{ inputs.wedge }}" --head-sha "${{ github.sha }}")
+        if [ -n "${{ inputs.otel_path }}" ]; then ARGS+=(--otel "${{ inputs.otel_path }}"); fi
+        if [ -n "${{ inputs.policy_path }}" ]; then ARGS+=(--policy "${{ inputs.policy_path }}"); fi
+        if [ -n "${{ inputs.sign_key }}" ]; then ARGS+=(--sign-key "${{ inputs.sign_key }}" --sign-method node_dsse); fi
+        if [ -n "${{ inputs.cosign_key }}" ]; then ARGS+=(--cosign-key "${{ inputs.cosign_key }}" --sign-method cosign); fi
+        if [ "${{ inputs.cosign_keyless }}" = "true" ] && [ -z "${{ inputs.cosign_key }}" ]; then ARGS+=(--cosign-keyless --sign-method cosign); fi
+        node dist/cli.js "${ARGS[@]}"
+      working-directory: ${{ github.action_path }}
+    - name: Paths
+      id: paths
+      shell: bash
+      run: |
+        echo "receipt_dir=${{ github.workspace }}/${{ inputs.output_dir }}" >> "$GITHUB_OUTPUT"
+        echo "bundle_path=${{ github.workspace }}/${{ inputs.output_dir }}/execution-receipt.bundle.json" >> "$GITHUB_OUTPUT"
+    - name: Publish GitHub Check Run
+      id: check
+      if: inputs.publish_check == 'true'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        OUT="${{ github.workspace }}/${{ inputs.output_dir }}"
+        ARGS=(--publish-only --out "$OUT" --check-name "${{ inputs.check_name }}")
+        if [ "${{ inputs.check_mock }}" = "true" ]; then
+          ARGS+=(--check-mock)
+        fi
+        if [ -n "${{ inputs.check_run_id }}" ]; then
+          ARGS+=(--check-run-id "${{ inputs.check_run_id }}")
+        fi
+        if [ -n "${{ inputs.check_details_url }}" ]; then
+          ARGS+=(--check-details-url "${{ inputs.check_details_url }}")
+        fi
+        # Capture conclusion from artifact after publish
+        node dist/cli.js "${ARGS[@]}"
+        node -e '
+          const fs = require("fs");
+          const p = process.argv[1];
+          const a = JSON.parse(fs.readFileSync(p, "utf8"));
+          const id = a.check_run_id ?? "";
+          const conclusion = a.request?.conclusion ?? "";
+          const out = process.env.GITHUB_OUTPUT;
+          fs.appendFileSync(out, `check_run_id=${id}\n`);
+          fs.appendFileSync(out, `check_conclusion=${conclusion}\n`);
+        ' "$OUT/github-check-run.json"
+      working-directory: ${{ github.action_path }}
+    - name: GitHub artifact attestation (custom agent-execution predicate)
+      if: inputs.github_attest == 'true'
+      uses: actions/attest@v2
+      with:
+        subject-path: ${{ github.workspace }}/${{ inputs.output_dir }}/execution-receipt.json
+        predicate-type: https://veriforge.dev/predicates/agent-execution/v0.1
+        predicate-path: ${{ github.workspace }}/${{ inputs.output_dir }}/agent-execution-predicate.json
+    - name: Upload receipt artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: veriforge-execution-receipt
+        path: ${{ github.workspace }}/${{ inputs.output_dir }}/
+        if-no-files-found: error

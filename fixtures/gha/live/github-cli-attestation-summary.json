@@ -1,0 +1,80 @@
+{
+  "source": {
+    "repository": "cli/cli",
+    "endpoint": "GET /repos/cli/cli/attestations/sha256:8aad120b416386b4269ef62c8fdebcad31a70847297817a149daf927edc85548",
+    "subject_name": "gh_2.50.0_windows_arm64.zip",
+    "subject_digest": "sha256:8aad120b416386b4269ef62c8fdebcad31a70847297817a149daf927edc85548",
+    "captured_at": "2026-07-18T11:03:23.466Z"
+  },
+  "captured_with": [
+    "gh release download v2.50.0 -R cli/cli -p gh_2.50.0_windows_arm64.zip -D /tmp/veriforge-live-attestation",
+    "gh attestation verify /tmp/veriforge-live-attestation/gh_2.50.0_windows_arm64.zip -R cli/cli --format json",
+    "gh api -H \"Accept: application/vnd.github+json\" -H \"X-GitHub-Api-Version: 2026-03-10\" /repos/cli/cli/attestations/sha256:8aad120b416386b4269ef62c8fdebcad31a70847297817a149daf927edc85548"
+  ],
+  "github_list_response_shape": {
+    "top_level_keys": [
+      "attestations"
+    ],
+    "attestation_keys_seen": [
+      "repository_id",
+      "bundle_url",
+      "initiator"
+    ],
+    "note": "bundle_url is an expiring signed URL; fixture redacts its query string."
+  },
+  "verified_statement": {
+    "_type": "https://in-toto.io/Statement/v1",
+    "predicateType": "https://slsa.dev/provenance/v1",
+    "subject": [
+      {
+        "name": "gh_2.50.0_windows_arm64.zip",
+        "digest": {
+          "sha256": "8aad120b416386b4269ef62c8fdebcad31a70847297817a149daf927edc85548"
+        }
+      }
+    ],
+    "predicate_keys": [
+      "buildDefinition",
+      "runDetails"
+    ],
+    "workflow": {
+      "path": ".github/workflows/deployment.yml",
+      "ref": "refs/heads/trunk",
+      "repository": "https://github.com/cli/cli"
+    },
+    "resolved_dependency": {
+      "digest": {
+        "gitCommit": "faef2ddd81b0736748413a7c646cd0bfc26c00a0"
+      },
+      "uri": "git+https://github.com/cli/cli@refs/heads/trunk"
+    },
+    "run_metadata": {
+      "invocationId": "https://github.com/cli/cli/actions/runs/9289075752/attempts/1"
+    }
+  },
+  "verified_identity": {
+    "issuer": "https://token.actions.githubusercontent.com",
+    "subjectAlternativeName": "https://github.com/cli/cli/.github/workflows/deployment.yml@refs/heads/trunk",
+    "sourceRepository": null,
+    "sourceRef": null,
+    "sourceDigest": null,
+    "runnerEnvironment": "github-hosted",
+    "timestamps_count": 1
+  },
+  "comparison_to_veriforge_agent_execution_v0_1": {
+    "compatible": [
+      "GitHub stores a standard Sigstore bundle with dsseEnvelope.payloadType=application/vnd.in-toto+json.",
+      "The decoded payload is an in-toto Statement with _type, subject[], predicateType, and predicate.",
+      "GitHub accepts arbitrary predicateType text, so https://veriforge.dev/predicates/agent-execution/v0.1 fits the same statement slot.",
+      "subject.name and subject.digest.sha256 map directly to VeriForge execution-receipt.json subject and subjectForCommit().",
+      "Source provenance can be projected from SLSA buildDefinition.externalParameters.workflow and resolvedDependencies[].digest.gitCommit into VeriForge source.repository/ref/head_commit.",
+      "Cryptographic/non-user-controlled identity lives in verificationResult.signature.certificate and verifiedTimestamps, matching VeriForge assurance classes for provenance.signing=github_oidc."
+    ],
+    "gaps_or_followups": [
+      "Modern repository attestations list API returns bundle_url, not an inline bundle; any importer must fetch/verify the bundle URL or use gh attestation verify output.",
+      "SLSA provenance uses buildDefinition/runDetails while VeriForge agent-execution uses source/task/agent/execution/evidence/policy/provenance; this is expected for GitHub provenance and does not require changing the custom predicate.",
+      "Do not treat statement.predicate alone as cryptographic truth; gh CLI warns only signature.certificate and verifiedTimestamps are non-user-controllable."
+    ],
+    "adapter_change_required": false
+  }
+}
